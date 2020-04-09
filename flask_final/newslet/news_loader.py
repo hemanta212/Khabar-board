@@ -6,15 +6,14 @@ Contains:
     load_news_to_models(): collects and registers news of specified category
 """
 
-# Try catch block to make orffline development possble
+# Try catch block to make offline development possble
 try:
-    from flask_final.newslet.kantipur_international import (
-        kantipur_international_extractor,
+    from flask_final.newslet.scrapers.kantipur_daily import (
+        kantipur_daily_extractor, kantipur_international_extractor
     )
-    from flask_final.newslet.kantipur_daily import kantipur_daily_extractor
-    from flask_final.newslet.kathmandupost import kathmandu_post_extractor
-    from flask_final.newslet.nagarik_international import (
-        nagarik_international_extractor,
+    from flask_final.newslet.scrapers.kathmandupost import kathmandu_post_extractor
+    from flask_final.newslet.scrapers.nagarik import (
+        nagarik_news_extractor,
     )
     from flask_final.newslet.top_international_news import get_general_headlines
     from flask_final.newslet.rss_news import get_news_from_rss
@@ -110,7 +109,7 @@ else:
         print("Unique news", i)
 
         # this for loop picks iterates over latest news list
-        # and then preserves first 60 items and deletes  all others
-        for i in models[category].query.order_by(order)[60:]:
+        # and then preserves first 100 items and deletes  all others
+        for i in models[category].query.order_by(order)[100:]:
             db.session.delete(i)
             db.session.commit()

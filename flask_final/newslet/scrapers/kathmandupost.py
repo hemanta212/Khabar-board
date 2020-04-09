@@ -4,40 +4,10 @@ Contains:
     kathmandu_post_extractor(): Gives list of news dicts
  """
 
-from datetime import datetime
 from bs4 import BeautifulSoup as BS
 import requests
 
-try:
-    from flask_final.newslet import parser
-except ImportError:
-    parser = "lxml"
-
-URL = "https://kathmandupost.ekantipur.com"
-
-
-def setup():
-    HEADERS = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36\
-            (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
-    }
-
-    try:
-        PAGE = requests.get(URL, headers=HEADERS)
-    except Exception as e:
-        print("Connection refused by the server..", e)
-
-    soup = BS(PAGE.content, parser)
-    return soup
-
-
-def format_date(raw_date):
-    org_format = "%Y/%m/%d"
-    datetime_obj = datetime.strptime(raw_date, org_format)
-    dest_format = "%d %b %Y"
-    date = datetime_obj.strftime(dest_format)
-    return date
-
+from common import get_soup, format_date
 
 def kathmandu_post_extractor():
     """Extracts the news from https://kathmandupost.ekantipur.com
@@ -55,7 +25,8 @@ def kathmandu_post_extractor():
         }
 
     """
-    soup = setup()
+    url = 'https://kathmandupost.ekantipur.com'
+    soup = get_soup(url)
     news_list = []
     column_one = soup.find("div", class_="grid-first")
     column_two = soup.find("div", class_="grid-second")
@@ -80,11 +51,12 @@ def kathmandu_post_extractor():
 
         for article in articles:
             href_link = article.h3.a["href"]
-            article_link = URL + href_link
+            article_link = url + href_link
             title = article.h3.a.text
 
             raw_date = "/".join(href_link.split("/")[2:5])
             date = format_date(raw_date)
+            print(date)
 
             image_tag = article.find("img")
             if image_tag:
@@ -109,4 +81,5 @@ def kathmandu_post_extractor():
 
 
 if __name__ == "__main__":
-    kathmandu_post_extractor()
+    news = kathmandu_post_extractor()
+    print(len(news))

@@ -1,36 +1,19 @@
 """
-Script to scrape news from www.kantipurdaily.com/news
+Script to scrape news from www.kantipurdaily.com/[news/world]
 Contains:
     kantipur_daily_extractor(): Gives list of news dicts
  """
 from bs4 import BeautifulSoup as BS
 import requests
-from datetime import datetime
 
-try:
-    from flask_final.newslet import parser
-except ImportError:
-    parser = "lxml"
+from common import get_soup, format_date
 
 
-def setup():
-    url = "https://www.kantipurdaily.com/news"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit\
-        /537.36(KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
-    }
-    try:
-        page = requests.get(url, headers=headers)
-    except Exception as e:
-        print("Connection refused by the server..", e)
-    soup = BS(page.content, parser)
-    return soup
-
-
-def kantipur_daily_extractor():
+def kantipur_daily_extractor(endpoint='news'):
     """
     Extracts news from www.kantipurdaily.com/news
-    Retruns
+    Params: endpoints = {news, world}
+    Returns:
     The order is as given by the website
     A list containing news dictionaries. Here is a sample
 
@@ -44,11 +27,10 @@ def kantipur_daily_extractor():
         }
 
     """
-    soup = setup()
-    counter = 0
+    url = f'https://www.kantipurdaily.com/{endpoint}'
+    soup = get_soup(url)
     news_list = []
     for article in soup.find_all("article", class_="normal"):
-
         title = article.h2.a.text
         summary = article.find("p").text
         image = article.find("div", class_="image").figure.a.img["data-src"]
@@ -74,18 +56,12 @@ def kantipur_daily_extractor():
             "image_link": big_img,
         }
         news_list.append(news_dict)
-        counter += 1
 
     return news_list
 
-
-def format_date(raw_date):
-    org_format = "%Y/%m/%d"
-    datetime_obj = datetime.strptime(raw_date, org_format)
-    dest_format = "%d %b %Y"
-    date = datetime_obj.strftime(dest_format)
-    return date
-
+def kantipur_international_extractor:
+    return kantipur_daily_extractor(endpoint='world')
 
 if __name__ == "__main__":
-    kantipur_daily_extractor()
+    news = kantipur_daily_extractor()
+    print(len(news))
